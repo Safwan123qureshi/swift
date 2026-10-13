@@ -3,51 +3,213 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <meta name="description" content="Swift Sign Group AI Assistant - Your trusted partner for IT Solutions and Business Management.">
-    <meta name="theme-color" content="#007bff">
-    <title>Swift Sign AI Assistant</title>
-    <!-- CSS Link -->
-    <link rel="stylesheet" href="style.css">
-    <!-- FontAwesome Icons -->
+    <meta name="description" content="Swift Sign Group — IT & Cyber Solutions, Business Setup, Shipping, Modest Fashion and Organic Foods. Talk to our intelligent AI assistant.">
+    <meta name="theme-color" content="#0b5fff">
+    <title>Swift Sign Group — Intelligent AI Assistant</title>
+
+    <!-- Favicon (inline SVG) -->
+    <link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'%3E%3Crect width='100' height='100' rx='22' fill='%230b5fff'/%3E%3Ctext x='50' y='68' font-size='54' font-family='Arial' font-weight='bold' fill='white' text-anchor='middle'%3ES%3C/text%3E%3C/svg%3E">
+
+    <!-- Fonts & Icons -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&display=swap" rel="stylesheet">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+
+    <!-- Styles -->
+    <link rel="stylesheet" href="style.css">
+
+    <!-- Apply saved theme before first paint to avoid a flash of the wrong theme -->
+    <script>
+        (function () {
+            try {
+                var saved = localStorage.getItem('swiftsign-theme');
+                var prefersDark = window.matchMedia && window.matchMedia('(prefers-color-scheme: dark)').matches;
+                var theme = saved || (prefersDark ? 'dark' : 'light');
+                document.documentElement.setAttribute('data-theme', theme);
+            } catch (e) { /* ignore */ }
+        })();
+    </script>
 </head>
 <body>
 
-    <!-- Main Website Content -->
-    <div style="padding: 50px; font-family: Arial, sans-serif;">
-        <h1>Welcome to Swift Sign Group</h1>
-        <p>Your trusted partner for IT Solutions and Business Management.</p>
-    </div>
-
-    <!-- Floating Chat Toggle Button (Blue Icon at bottom right) -->
-    <div class="chat-icon-btn" onclick="toggleChat()" style="position: fixed; bottom: 20px; right: 20px; background: #007bff; color: white; width: 60px; height: 60px; border-radius: 50%; display: flex; align-items: center; justify-content: center; cursor: pointer; box-shadow: 0 4px 10px rgba(0,0,0,0.3); font-size: 24px; z-index: 1000;" title="Chat with Swift Sign AI">
-        <i class="fa-solid fa-comments"></i>
-    </div>
-
-    <!-- Chat Window Container -->
-    <div id="chat-container" class="chat-hidden" style="display: none; position: fixed; bottom: 90px; right: 20px; width: 350px; height: 450px; background: white; border-radius: 10px; box-shadow: 0 5px 15px rgba(0,0,0,0.3); flex-direction: column; overflow: hidden; z-index: 1000;">
-        
-        <!-- Chat Header -->
-        <div style="background: #007bff; color: white; padding: 15px; display: flex; justify-content: space-between; align-items: center;">
-            <h3 style="margin: 0; font-size: 16px;">Swift Sign AI</h3>
-            <span onclick="toggleChat()" style="cursor: pointer; font-size: 20px; font-weight: bold;" title="Close">&times;</span>
+    <!-- ============ NAVBAR ============ -->
+    <header class="navbar" id="navbar">
+        <div class="nav-inner">
+            <a class="brand" href="#top" aria-label="Swift Sign Group home">
+                <span class="brand-mark"><i class="fa-solid fa-bolt"></i></span>
+                <span class="brand-text">Swift&nbsp;Sign<span class="brand-dot">.</span></span>
+            </a>
+            <nav class="nav-links" id="navLinks">
+                <a href="#divisions">Divisions</a>
+                <a href="#why">Why Us</a>
+                <a href="#contact">Contact</a>
+            </nav>
+            <div class="nav-actions">
+                <button class="theme-toggle" id="themeToggle" title="Toggle dark mode" aria-label="Toggle dark mode">
+                    <i class="fa-solid fa-moon icon-moon"></i>
+                    <i class="fa-solid fa-sun icon-sun"></i>
+                </button>
+                <button class="btn btn-ghost" onclick="toggleChat(true)"><i class="fa-solid fa-comment-dots"></i> Talk to AI</button>
+                <button class="nav-toggle" id="navToggle" aria-label="Toggle menu"><i class="fa-solid fa-bars"></i></button>
+            </div>
         </div>
+    </header>
 
-        <!-- Chat Messages Box -->
-        <div id="chatBox" style="flex: 1; padding: 15px; overflow-y: auto; background: #f9f9f9; font-size: 14px;">
-            <div class="bot-msg" style="margin-bottom: 10px; background: #e9ecef; padding: 8px 12px; border-radius: 8px;">
-                <strong>AI:</strong> Hello! How can I assist you with Swift Sign services today?
+    <!-- ============ HERO ============ -->
+    <main id="top">
+        <section class="hero">
+            <div class="hero-bg" aria-hidden="true">
+                <span class="orb orb-1"></span>
+                <span class="orb orb-2"></span>
+                <span class="orb orb-3"></span>
+            </div>
+            <div class="hero-content">
+                <span class="pill"><span class="pill-dot"></span> AI Assistant is online</span>
+                <h1>One Group. <span class="grad">Five Industries.</span><br>Powered by Intelligent AI.</h1>
+                <p class="lede">Swift Sign Group unites IT &amp; Cyber, Business Setup, Shipping, Modest Fashion and Organic Foods — with an AI assistant ready to help you 24/7.</p>
+                <div class="hero-cta">
+                    <button class="btn btn-primary btn-lg" onclick="toggleChat(true)"><i class="fa-solid fa-comments"></i> Start chatting</button>
+                    <a class="btn btn-outline btn-lg" href="#divisions"><i class="fa-solid fa-layer-group"></i> Explore divisions</a>
+                </div>
+                <div class="hero-stats">
+                    <div class="stat"><strong>5</strong><span>Divisions</span></div>
+                    <div class="stat"><strong>3</strong><span>Countries</span></div>
+                    <div class="stat"><strong>24/7</strong><span>AI Support</span></div>
+                </div>
+            </div>
+        </section>
+
+        <!-- ============ DIVISIONS ============ -->
+        <section class="section" id="divisions">
+            <div class="section-head">
+                <span class="eyebrow">Our Divisions</span>
+                <h2>Everything you need, under one roof</h2>
+                <p>Ask the assistant about any division — it knows them all.</p>
+            </div>
+            <div class="cards">
+                <article class="card" onclick="askAbout('IT & Cyber Solutions')">
+                    <div class="card-icon icon-blue"><i class="fa-solid fa-shield-halved"></i></div>
+                    <h3>IT &amp; Cyber Solutions</h3>
+                    <p>Software, web &amp; mobile apps, cyber-security audits, CCTV and access control.</p>
+                    <span class="card-link">Ask about IT <i class="fa-solid fa-arrow-right"></i></span>
+                </article>
+                <article class="card" onclick="askAbout('Business Setup')">
+                    <div class="card-icon icon-teal"><i class="fa-solid fa-briefcase"></i></div>
+                    <h3>Business Setup</h3>
+                    <p>UAE company formation, licensing, PRO services, compliance and accounting.</p>
+                    <span class="card-link">Ask about setup <i class="fa-solid fa-arrow-right"></i></span>
+                </article>
+                <article class="card" onclick="askAbout('Shipping & Trading')">
+                    <div class="card-icon icon-amber"><i class="fa-solid fa-truck-fast"></i></div>
+                    <h3>Shipping &amp; Trading</h3>
+                    <p>Sea, air and land freight across the GCC, plus ISPM-15 treated pallets.</p>
+                    <span class="card-link">Ask about shipping <i class="fa-solid fa-arrow-right"></i></span>
+                </article>
+                <article class="card" onclick="askAbout('Laila Hijab fashion')">
+                    <div class="card-icon icon-pink"><i class="fa-solid fa-shirt"></i></div>
+                    <h3>Laila Hijab</h3>
+                    <p>Premium hijabs, abayas, scarves and modest accessories, shipped worldwide.</p>
+                    <span class="card-link">Ask about fashion <i class="fa-solid fa-arrow-right"></i></span>
+                </article>
+                <article class="card" onclick="askAbout('Organic Food products')">
+                    <div class="card-icon icon-green"><i class="fa-solid fa-seedling"></i></div>
+                    <h3>Organic Foods</h3>
+                    <p>Pure honey, premium dried fruits &amp; nuts and organic health staples.</p>
+                    <span class="card-link">Ask about food <i class="fa-solid fa-arrow-right"></i></span>
+                </article>
+                <article class="card card-cta" onclick="toggleChat(true)">
+                    <div class="card-icon icon-blue"><i class="fa-solid fa-robot"></i></div>
+                    <h3>Have a question?</h3>
+                    <p>Our AI assistant can answer anything about the group instantly.</p>
+                    <span class="card-link">Chat now <i class="fa-solid fa-arrow-right"></i></span>
+                </article>
+            </div>
+        </section>
+
+        <!-- ============ WHY US ============ -->
+        <section class="section section-alt" id="why">
+            <div class="section-head">
+                <span class="eyebrow">Why Swift Sign</span>
+                <h2>Trusted across Pakistan, the UAE &amp; the GCC</h2>
+            </div>
+            <div class="features">
+                <div class="feature"><i class="fa-solid fa-globe"></i><h4>Global Footprint</h4><p>Operations spanning Pakistan, the UAE, GCC, Europe, Asia and the Americas.</p></div>
+                <div class="feature"><i class="fa-solid fa-bolt"></i><h4>Instant AI Support</h4><p>Get accurate answers about every division in seconds, any time of day.</p></div>
+                <div class="feature"><i class="fa-solid fa-award"></i><h4>Quality First</h4><p>Certified processes and rigorously tested products across all divisions.</p></div>
+            </div>
+        </section>
+
+        <!-- ============ CONTACT / CTA ============ -->
+        <section class="section" id="contact">
+            <div class="cta-panel">
+                <div>
+                    <h2>Ready when you are</h2>
+                    <p>Chat with our assistant, or reach our team directly.</p>
+                </div>
+                <div class="cta-info">
+                    <a href="mailto:info@swiftsignbm.com"><i class="fa-solid fa-envelope"></i> info@swiftsignbm.com</a>
+                    <a href="tel:+923348399480"><i class="fa-solid fa-phone"></i> +92 334 8399480</a>
+                    <button class="btn btn-primary" onclick="toggleChat(true)"><i class="fa-solid fa-comments"></i> Chat with AI</button>
+                </div>
+            </div>
+        </section>
+    </main>
+
+    <!-- ============ FOOTER ============ -->
+    <footer class="footer">
+        <div class="foot-inner">
+            <span class="brand-text">Swift&nbsp;Sign<span class="brand-dot">.</span></span>
+            <p>© <span id="year"></span> Swift Sign Group of Companies. All rights reserved.</p>
+        </div>
+    </footer>
+
+    <!-- ============ FLOATING CHAT BUTTON ============ -->
+    <button class="chat-fab" id="chatFab" onclick="toggleChat()" aria-label="Open chat" title="Chat with Swift Sign AI">
+        <i class="fa-solid fa-comment-dots fab-open"></i>
+        <i class="fa-solid fa-xmark fab-close"></i>
+        <span class="fab-badge" id="fabBadge">1</span>
+    </button>
+
+    <!-- ============ CHAT WIDGET ============ -->
+    <div id="chat-container" class="chat-hidden" role="dialog" aria-label="Swift Sign AI chat">
+        <div class="chat-header">
+            <div class="chat-header-info">
+                <div class="chat-avatar"><i class="fa-solid fa-robot"></i></div>
+                <div class="chat-title-wrap">
+                    <h3>Swift Sign AI</h3>
+                    <span class="chat-status"><span class="status-dot"></span> Online — replies instantly</span>
+                </div>
+            </div>
+            <div class="chat-header-actions">
+                <button class="chat-clear" id="chatClear" title="Clear conversation" aria-label="Clear conversation"><i class="fa-solid fa-broom"></i></button>
+                <button class="chat-close" onclick="toggleChat()" title="Close" aria-label="Close chat"><i class="fa-solid fa-chevron-down"></i></button>
             </div>
         </div>
 
-        <!-- Chat Input Area -->
-        <div style="padding: 10px; background: white; border-top: 1px solid #ddd; display: flex; gap: 8px;">
-            <input type="text" id="userInput" placeholder="Type your query..." style="flex: 1; padding: 8px 12px; border: 1px solid #ccc; border-radius: 4px; outline: none;" autocomplete="off" />
-            <button onclick="sendMessage()" id="sendBtn" style="background: #007bff; color: white; border: none; padding: 8px 15px; border-radius: 4px; cursor: pointer;" title="Send message">
-                <i class="fa-solid fa-paper-plane"></i>
-            </button>
+        <div id="chatBox" class="chat-messages" aria-live="polite">
+            <div class="msg bot-msg">
+                <div class="msg-avatar"><i class="fa-solid fa-robot"></i></div>
+                <div class="msg-bubble">
+                    <p>👋 Hello! I'm the official assistant for <strong>Swift Sign Group</strong>.</p>
+                    <p>Ask me about our IT &amp; Cyber, Business Setup, Shipping, Laila Hijab or Organic Foods.</p>
+                </div>
+            </div>
         </div>
 
+        <div class="chat-quick" id="chatQuick">
+            <button class="quick-chip" onclick="quickAsk('What services do you offer?')">What do you offer?</button>
+            <button class="quick-chip" onclick="quickAsk('Where are your offices located?')">Office locations</button>
+            <button class="quick-chip" onclick="quickAsk('Tell me about your IT & Cyber services')">IT &amp; Cyber</button>
+            <button class="quick-chip" onclick="quickAsk('How can I contact you?')">Contact us</button>
+        </div>
+
+        <form class="chat-input-area" id="chatForm" onsubmit="return sendMessage(event)">
+            <input type="text" id="userInput" placeholder="Type your message…" autocomplete="off" aria-label="Message" />
+            <button type="submit" id="sendBtn" class="chat-send" title="Send" aria-label="Send message">
+                <i class="fa-solid fa-paper-plane"></i>
+            </button>
+        </form>
     </div>
 
     <!-- JavaScript Link -->

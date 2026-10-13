@@ -134,14 +134,15 @@ def check_prompt_injection(user_text: str) -> bool:
     lowered = user_text.lower()
     return any(phrase in lowered for phrase in FORBIDDEN_PROMPTS)
 
-# Candidate Gemini models for resilient cascading (primary: gemini-3.8-flash)
+# Candidate Gemini models for resilient cascading.
+# Only currently-available Gemini Flash models are listed (per Google's model docs).
+# The cascading loop tries each in order and falls through on 503/overload,
+# so ordering the most reliable stable model first minimises latency.
 MODEL_CANDIDATES: List[str] = [
-    "gemini-3.8-flash",
-    "gemini-3.5-flash",
-    "gemini-3.5-flash-lite",
-    "gemini-2.5-flash",
+    "gemini-3.6-flash",
     "gemini-flash-latest",
-    "gemini-flash-lite-latest",
+    "gemini-3.8-flash",
+    "gemini-3.5-flash-lite",
 ]
 
 _gemini_client: Optional[genai.Client] = None
@@ -149,7 +150,16 @@ _gemini_client: Optional[genai.Client] = None
 def get_gemini_client(api_key: str) -> genai.Client:
     global _gemini_client
     if _gemini_client is None:
-        _gemini_client = genai.Client(api_key=api_key)
+        # Cap the per-request HTTP timeout so an overloaded model fails fast and
+        # lets the cascading loop move on to the next candidate quickly.
+        # Fall back gracefully if the installed library lacks http_options support.
+        try:
+            _gemini_client = genai.Client(
+                api_key=api_key,
+                http_options={"timeout": 30_000},  # milliseconds
+            )
+        except TypeError:
+            _gemini_client = genai.Client(api_key=api_key)
     return _gemini_client
 
 def generate_gemini_reply(client: genai.Client, prompt: str, system_instruction: str) -> str:

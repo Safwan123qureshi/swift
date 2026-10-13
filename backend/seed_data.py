@@ -1,6 +1,13 @@
 import sys
 import os
 
+# Windows consoles default to cp1252 which cannot print emoji (e.g. the check
+# mark). Reconfigure stdout to UTF-8 so seeding output never crashes.
+try:
+    sys.stdout.reconfigure(encoding="utf-8")
+except Exception:
+    pass
+
 # Parent directory ko Python path mein add karna
 sys.path.append(os.path.dirname(os.path.abspath(__file__)))
 
@@ -21,7 +28,7 @@ def seed_database():
             return
 
         # 1. Test Client create karna
-        client = Client(name="Swift Sign Group", domain="swiftsignbm.com")
+        client = Client(name="Swift Sign Group", status="active")
         db.add(client)
         db.commit()
         db.refresh(client)
@@ -30,8 +37,9 @@ def seed_database():
         assistant = Assistant(
             client_id=client.id,
             name="Swift Sign AI",
-            system_instruction="You are a polite AI assistant for Swift Sign Group. Provide concise and helpful info.",
-            model_name="gemini-2.5-flash"
+            welcome_message="Hello! How can I help you today?",
+            tone="professional",
+            system_prompt="You are a polite AI assistant for Swift Sign Group. Provide concise and helpful info."
         )
         db.add(assistant)
 

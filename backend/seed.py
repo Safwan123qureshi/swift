@@ -2,6 +2,13 @@ import sys
 import os
 from pathlib import Path
 
+# Windows consoles default to cp1252 which cannot print some characters.
+# Reconfigure stdout to UTF-8 so seeding output never crashes.
+try:
+    sys.stdout.reconfigure(encoding="utf-8")
+except Exception:
+    pass
+
 # Ensure backend directory is in path
 CURRENT_DIR = Path(__file__).resolve().parent
 sys.path.append(str(CURRENT_DIR))

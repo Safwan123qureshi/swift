@@ -9,7 +9,7 @@ class LLMProvider:
             raise ValueError("GEMINI_API_KEY environment variable missing.")
         self.client = genai.Client(api_key=api_key)
 
-    def generate_response(self, prompt: str, system_instruction: str, model: str = "gemini-2.5-flash") -> str:
+    def generate_response(self, prompt: str, system_instruction: str, model: str = "gemini-flash-latest") -> str:
         try:
             response = self.client.models.generate_content(
                 model=model,
