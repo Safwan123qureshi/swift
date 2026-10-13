@@ -3,6 +3,8 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="description" content="Swift Sign Group AI Assistant - Your trusted partner for IT Solutions and Business Management.">
+    <meta name="theme-color" content="#007bff">
     <title>Swift Sign AI Assistant</title>
     <!-- CSS Link -->
     <link rel="stylesheet" href="style.css">
@@ -18,7 +20,7 @@
     </div>
 
     <!-- Floating Chat Toggle Button (Blue Icon at bottom right) -->
-    <div class="chat-icon-btn" onclick="toggleChat()" style="position: fixed; bottom: 20px; right: 20px; background: #007bff; color: white; width: 60px; height: 60px; border-radius: 50%; display: flex; align-items: center; justify-content: center; cursor: pointer; box-shadow: 0 4px 10px rgba(0,0,0,0.3); font-size: 24px; z-index: 1000;">
+    <div class="chat-icon-btn" onclick="toggleChat()" style="position: fixed; bottom: 20px; right: 20px; background: #007bff; color: white; width: 60px; height: 60px; border-radius: 50%; display: flex; align-items: center; justify-content: center; cursor: pointer; box-shadow: 0 4px 10px rgba(0,0,0,0.3); font-size: 24px; z-index: 1000;" title="Chat with Swift Sign AI">
         <i class="fa-solid fa-comments"></i>
     </div>
 
@@ -28,7 +30,7 @@
         <!-- Chat Header -->
         <div style="background: #007bff; color: white; padding: 15px; display: flex; justify-content: space-between; align-items: center;">
             <h3 style="margin: 0; font-size: 16px;">Swift Sign AI</h3>
-            <span onclick="toggleChat()" style="cursor: pointer; font-size: 20px; font-weight: bold;">&times;</span>
+            <span onclick="toggleChat()" style="cursor: pointer; font-size: 20px; font-weight: bold;" title="Close">&times;</span>
         </div>
 
         <!-- Chat Messages Box -->
@@ -40,8 +42,8 @@
 
         <!-- Chat Input Area -->
         <div style="padding: 10px; background: white; border-top: 1px solid #ddd; display: flex; gap: 8px;">
-            <input type="text" id="userInput" placeholder="Type your query..." style="flex: 1; padding: 8px 12px; border: 1px solid #ccc; border-radius: 4px; outline: none;" />
-            <button onclick="sendMessage()" style="background: #007bff; color: white; border: none; padding: 8px 15px; border-radius: 4px; cursor: pointer;">
+            <input type="text" id="userInput" placeholder="Type your query..." style="flex: 1; padding: 8px 12px; border: 1px solid #ccc; border-radius: 4px; outline: none;" autocomplete="off" />
+            <button onclick="sendMessage()" id="sendBtn" style="background: #007bff; color: white; border: none; padding: 8px 15px; border-radius: 4px; cursor: pointer;" title="Send message">
                 <i class="fa-solid fa-paper-plane"></i>
             </button>
         </div>

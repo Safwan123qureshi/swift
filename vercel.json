@@ -2,30 +2,22 @@
   "version": 2,
   "builds": [
     {
-      "src": "backend/app.py",
-      "use": "@vercel/python"
-    },
-    {
-      "src": "frontend/index.html",
+      "src": "frontend/**",
       "use": "@vercel/static"
     }
   ],
   "routes": [
     {
-      "src": "/chat",
-      "dest": "backend/app.py"
+      "src": "/style.css",
+      "dest": "/frontend/style.css"
     },
     {
-      "src": "/history",
-      "dest": "backend/app.py"
-    },
-    {
-      "src": "/clear_history",
-      "dest": "backend/app.py"
+      "src": "/script.js",
+      "dest": "/frontend/script.js"
     },
     {
       "src": "/(.*)",
-      "dest": "frontend/index.html"
+      "dest": "/frontend/index.html"
     }
   ]
 }

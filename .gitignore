@@ -1,5 +1,6 @@
-# Environment
+# Environment variables
 .env
+backend/.env
 
 # Python
 __pycache__/
@@ -9,14 +10,26 @@ __pycache__/
 venv/
 .venv/
 
-# Databases (local only)
+# Databases (local only — never push to production)
 *.db
 *.sqlite
 *.sqlite3
 
 # Editor
 .vscode/
+.idea/
 
 # OS
 .DS_Store
-Thumbs.db
+Thumbs.db
+
+# Vercel
+.vercel
+
+# Logs
+*.log
+npm-debug.log*
+
+# Build artifacts
+dist/
+build/

@@ -28,7 +28,7 @@ async function sendMessage() {
 
     // Loading state ON karein aur send button disable karein
     isLoading = true;
-    const sendBtn = document.querySelector('button[onclick="sendMessage()"]');
+    const sendBtn = document.getElementById('sendBtn');
     if (sendBtn) sendBtn.disabled = true;
 
     // User ka message chat box mein dikhayein
