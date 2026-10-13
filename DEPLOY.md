@@ -55,3 +55,30 @@ start.bat                        # or: python run.py
 ```bash
 venv\Scripts\python.exe test_app.py
 ```
+
+## Automated testing (GitHub Actions)
+Every push / pull request to `main` runs `.github/workflows/ci.yml`, which:
+1. Installs dependencies from `requirements.txt`
+2. Runs the test suite (`test_app.py`)
+3. Verifies the Vercel serverless function imports correctly
+
+You'll see a green ✅ (or red ❌) next to each commit on GitHub under the **Actions** tab.
+
+---
+
+## Option B: Deploy the full backend to Render
+`render.yaml` defines a Render web service that hosts the **complete** FastAPI
+backend (API + admin endpoints + SQLite database).
+
+1. Go to https://dashboard.render.com → **New → Blueprint** and connect this repo.
+2. Render reads `render.yaml` automatically.
+3. Add the secret **`GEMINI_API_KEY`** in the Render dashboard when prompted
+   (it is marked `sync: false`, so it is never stored in the repo).
+4. Deploy — Render gives you a URL like `https://swiftsign-chatbot-api.onrender.com`.
+
+To point the frontend at the Render backend instead of the local one, set this
+before loading the page (e.g. in a `<script>` in `index.html` or the console):
+```js
+window.SWIFTSIGN_API_URL = 'https://swiftsign-chatbot-api.onrender.com/api/chat';
+```
+

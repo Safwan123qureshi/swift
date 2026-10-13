@@ -1,0 +1,44 @@
+name: CI
+
+# Run the test suite on every push and pull request to main.
+on:
+  push:
+    branches: [main]
+  pull_request:
+    branches: [main]
+
+permissions:
+  contents: read
+
+jobs:
+  test:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: '3.11'
+          cache: 'pip'
+
+      - name: Install dependencies
+        run: pip install -r requirements.txt
+
+      - name: Run tests
+        # test_app.py exercises health, greetings, security filtering and DB CRUD.
+        # It does not require a real GEMINI_API_KEY.
+        run: python test_app.py
+
+      - name: Verify serverless API imports
+        # Sanity-check the Vercel function loads and exposes its handler.
+        run: |
+          python - <<'PY'
+          import importlib.util as u
+          s = u.spec_from_file_location("c", "api/chat.py")
+          m = u.module_from_spec(s); s.loader.exec_module(m)
+          assert hasattr(m, "handler"), "serverless handler missing"
+          assert len(m.COMPANY_DATA) >= 6, "knowledge base incomplete"
+          print("serverless function OK; divisions:", len(m.COMPANY_DATA))
+          PY

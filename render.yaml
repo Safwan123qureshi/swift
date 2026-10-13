@@ -1,0 +1,21 @@
+# Render Blueprint — Swift Sign Group AI Chatbot (full FastAPI backend)
+# Docs: https://render.com/docs/blueprint-spec
+# This hosts the COMPLETE backend (API + admin + SQLite DB) as a second host
+# alongside the Vercel serverless frontend.
+services:
+  - type: web
+    name: swiftsign-chatbot-api
+    runtime: python
+    plan: free
+    autoDeploy: true
+    buildCommand: pip install -r requirements.txt
+    # --app-dir backend puts the backend folder on the path so `app.main:app` imports.
+    startCommand: uvicorn app.main:app --app-dir backend --host 0.0.0.0 --port $PORT
+    healthCheckPath: /
+    envVars:
+      # Secret — set this in the Render dashboard (never commit the real key).
+      - key: GEMINI_API_KEY
+        sync: false
+      # Pin a Python version Render supports and that google-genai runs on.
+      - key: PYTHON_VERSION
+        value: 3.11.9
