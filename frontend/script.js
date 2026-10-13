@@ -13,12 +13,23 @@ function toggleChat() {
 // 2. Render Backend par message bhejne ka function
 const API_URL = "https://swiftsign-backend.onrender.com/api/chat"; // Aapka Render backend link
 
+// Double-send guard: jab tak ek request chal rahi hai, doosri nahi jayegi
+let isLoading = false;
+
 async function sendMessage() {
+    // Agar already ek request chal rahi hai toh ignore karein
+    if (isLoading) return;
+
     const userInput = document.getElementById('userInput');
     const chatBox = document.getElementById('chatBox');
     const text = userInput.value.trim();
 
     if (!text) return; // Agar input khali hai toh kuch na karein
+
+    // Loading state ON karein aur send button disable karein
+    isLoading = true;
+    const sendBtn = document.querySelector('button[onclick="sendMessage()"]');
+    if (sendBtn) sendBtn.disabled = true;
 
     // User ka message chat box mein dikhayein
     chatBox.innerHTML += `
@@ -32,7 +43,7 @@ async function sendMessage() {
     userInput.value = ''; // Input box clear kar dein
     chatBox.scrollTop = chatBox.scrollHeight;
 
-    // Loading indicator ya temporary text
+    // Loading indicator
     const loadingId = 'loading-' + Date.now();
     chatBox.innerHTML += `
         <div id="${loadingId}" class="bot-msg" style="margin-bottom: 10px; background: #e9ecef; padding: 8px 12px; border-radius: 8px;">
@@ -49,6 +60,16 @@ async function sendMessage() {
             },
             body: JSON.stringify({ message: text })
         });
+
+        // HTTP error check (4xx, 5xx responses handle karein)
+        if (!response.ok) {
+            let errorMsg = `Server error (HTTP ${response.status})`;
+            try {
+                const errData = await response.json();
+                errorMsg = errData.detail || errData.message || errorMsg;
+            } catch (_) {}
+            throw new Error(errorMsg);
+        }
 
         const data = await response.json();
         
@@ -67,14 +88,20 @@ async function sendMessage() {
 
     } catch (error) {
         console.error("Error:", error);
-        document.getElementById(loadingId).remove();
+        const loader = document.getElementById(loadingId);
+        if (loader) loader.remove();
         chatBox.innerHTML += `
             <div class="bot-msg" style="margin-bottom: 10px; background: #f8d7da; color: #721c24; padding: 8px 12px; border-radius: 8px;">
-                <strong>AI:</strong> Server se connect nahi ho saka. (Render server sleep mode par ho sakta hai, 30 sec baad try karein).
+                <strong>AI:</strong> ${escapeHtml(error.message) || 'Server se connect nahi ho saka.'} (Render server sleep mode par ho sakta hai, 30 sec baad try karein).
             </div>
         `;
+    } finally {
+        // Request khatam — loading state OFF karein
+        isLoading = false;
+        if (sendBtn) sendBtn.disabled = false;
+        userInput.focus();
+        chatBox.scrollTop = chatBox.scrollHeight;
     }
-    chatBox.scrollTop = chatBox.scrollHeight;
 }
 
 // Enter key press karne par bhi message send ho jaye
