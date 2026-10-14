@@ -1,0 +1,354 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Swift Sign Chatbot — System Architecture</title>
+<style>
+  :root{--blue:#0b5fff;--blue-soft:#e8f0ff;--ink:#0f1729;--muted:#5b6b86;--line:#e3e8f0;--bg:#f5f7fb;--card:#fff;
+    --purple:#7c3aed;--purple-soft:#f1eaff;--teal:#0d9488;--teal-soft:#e0f5f2;--amber:#d97706;--amber-soft:#fdf1dd;
+    --green:#16a34a;--green-soft:#e4f6ea;--red:#dc2626;--red-soft:#fde8e8;--code:#0f1729;--code-ink:#d7e0f0}
+  *{box-sizing:border-box}html{scroll-behavior:smooth}
+  body{margin:0;font-family:'Plus Jakarta Sans',-apple-system,'Segoe UI',Roboto,Arial,sans-serif;color:var(--ink);background:var(--bg);line-height:1.6}
+  .wrap{max-width:1120px;margin:0 auto;padding:0 22px}
+  header.hero{background:linear-gradient(135deg,#0b3dbb,#0b5fff 55%,#3b82f6);color:#fff;padding:52px 0 44px;position:relative;overflow:hidden}
+  header.hero::after{content:"";position:absolute;right:-80px;top:-80px;width:320px;height:320px;background:radial-gradient(circle,rgba(255,255,255,.18),transparent 70%);border-radius:50%}
+  .brand{display:flex;align-items:center;gap:12px;font-weight:800;font-size:15px}
+  .brand .mark{width:38px;height:38px;border-radius:11px;background:#fff;color:var(--blue);display:grid;place-items:center;font-size:20px;font-weight:800;box-shadow:0 6px 18px rgba(0,0,0,.18)}
+  header.hero h1{font-size:38px;line-height:1.15;margin:22px 0 10px;font-weight:800}
+  header.hero p{font-size:17px;max-width:780px;opacity:.95;margin:0}
+  .tags{display:flex;flex-wrap:wrap;gap:8px;margin-top:20px}
+  .tag{background:rgba(255,255,255,.16);border:1px solid rgba(255,255,255,.28);padding:5px 12px;border-radius:999px;font-size:12.5px;font-weight:600}
+  section{padding:40px 0}
+  h2{font-size:26px;margin:0 0 6px;font-weight:800;letter-spacing:-.2px}
+  h2 .num{color:var(--blue);font-size:15px;margin-right:8px;font-weight:800}
+  .sub{color:var(--muted);margin:0 0 26px;font-size:15px}
+  h3{font-size:17px;margin:0 0 10px;font-weight:700}
+  .card{background:var(--card);border:1px solid var(--line);border-radius:16px;padding:22px;box-shadow:0 1px 2px rgba(16,24,40,.04)}
+  .grid{display:grid;gap:16px}.g2{grid-template-columns:repeat(2,1fr)}.g3{grid-template-columns:repeat(3,1fr)}
+  @media(max-width:860px){.g2,.g3{grid-template-columns:1fr}}
+  .node{border-radius:14px;padding:14px 16px;border:1.5px solid var(--line);background:#fff}
+  .node .t{font-weight:800;font-size:14px;display:flex;align-items:center;gap:8px}
+  .node .d{font-size:12.5px;color:var(--muted);margin-top:4px}
+  .n-blue{border-color:#bcd0ff;background:var(--blue-soft)}.n-blue .t{color:#0a3fb0}
+  .n-purple{border-color:#d9c6ff;background:var(--purple-soft)}.n-purple .t{color:#5b21b6}
+  .n-teal{border-color:#a7e2d8;background:var(--teal-soft)}.n-teal .t{color:#0b6e64}
+  .n-amber{border-color:#f3d69a;background:var(--amber-soft)}.n-amber .t{color:#9a5b04}
+  .n-green{border-color:#a9e6bd;background:var(--green-soft)}.n-green .t{color:#0f7a37}
+  .n-red{border-color:#f3b4b4;background:var(--red-soft)}.n-red .t{color:#a91d1d}
+  .arrow{display:flex;align-items:center;justify-content:center;color:#9fb0c9;font-size:22px;font-weight:800;line-height:1}
+  .arrow.col{transform:rotate(90deg)}
+  .steps{display:grid;gap:12px}
+  .step{display:flex;gap:14px;align-items:flex-start;background:#fff;border:1px solid var(--line);border-radius:12px;padding:14px 16px}
+  .step .n{flex:0 0 30px;height:30px;border-radius:9px;background:var(--blue);color:#fff;display:grid;place-items:center;font-weight:800;font-size:14px}
+  .step .b{flex:1}.step .b b{font-size:14.5px}.step .b span{display:block;color:var(--muted);font-size:13px;margin-top:2px}
+  .chip{display:inline-block;font-size:11px;font-weight:700;padding:2px 9px;border-radius:999px;vertical-align:middle;margin-left:6px}
+  .chip.fe{border:1px solid #bcd0ff;color:#0a3fb0;background:var(--blue-soft)}
+  .chip.api{border:1px solid #d9c6ff;color:#5b21b6;background:var(--purple-soft)}
+  pre{background:var(--code);color:var(--code-ink);padding:16px 18px;border-radius:12px;overflow:auto;font-size:12.5px;line-height:1.55;margin:0}
+  pre .c{color:#7c8aa5}pre .k{color:#7dd3fc}pre .s{color:#a7f3d0}pre .p{color:#f0abfc}
+  code.inline{background:#eef2f8;border:1px solid var(--line);padding:1px 7px;border-radius:6px;font-size:12.5px;font-family:'SF Mono',ui-monospace,Consolas,monospace}
+  table{width:100%;border-collapse:collapse;font-size:13.5px;background:#fff;border-radius:12px;overflow:hidden;border:1px solid var(--line)}
+  th,td{padding:11px 14px;text-align:left;border-bottom:1px solid var(--line);vertical-align:top}
+  th{background:#f0f4fa;font-weight:800;font-size:12px;text-transform:uppercase;letter-spacing:.4px;color:#33415c}
+  tr:last-child td{border-bottom:none}
+  td code{font-family:'SF Mono',ui-monospace,Consolas,monospace;font-size:12px}
+  .tree{font-family:'SF Mono',ui-monospace,Consolas,monospace;font-size:13px;line-height:1.9;background:#fff;border:1px solid var(--line);border-radius:12px;padding:18px 20px}
+  .tree .dir{color:var(--blue);font-weight:700}.tree .file{color:#33415c}.tree .note{color:var(--muted);font-style:italic}
+  .cascade{display:flex;flex-direction:column;gap:8px}
+  .casc{display:flex;align-items:center;gap:12px;border:1.5px solid var(--line);border-radius:10px;padding:9px 14px;background:#fff}
+  .casc .rank{font-weight:800;color:var(--muted);font-size:12px;width:26px}
+  .casc .name{font-family:'SF Mono',ui-monospace,Consolas,monospace;font-size:13px;flex:1}
+  .casc .badge{font-size:11px;font-weight:800;padding:2px 10px;border-radius:999px}
+  .badge.ok{background:var(--green-soft);color:var(--green);border:1px solid #a9e6bd}
+  .badge.fast{background:var(--green);color:#fff}
+  .badge.fb{background:#eef2f8;color:var(--muted);border:1px solid var(--line)}
+  .legend{display:flex;flex-wrap:wrap;gap:16px;margin-top:14px;font-size:12.5px;color:var(--muted)}
+  .legend b{color:var(--ink)}
+  .dot{display:inline-block;width:11px;height:11px;border-radius:4px;margin-right:6px;vertical-align:middle}
+  footer{padding:30px 0 50px;color:var(--muted);font-size:13px;text-align:center}
+  .pill-live{display:inline-flex;align-items:center;gap:7px;background:#e4f6ea;color:#0f7a37;border:1px solid #a9e6bd;padding:4px 12px;border-radius:999px;font-weight:700;font-size:12.5px}
+  .pill-live .d{width:8px;height:8px;border-radius:50%;background:var(--green);box-shadow:0 0 0 3px rgba(22,163,74,.2)}
+  .kpi{display:grid;grid-template-columns:repeat(4,1fr);gap:14px;margin:18px 0}
+  @media(max-width:760px){.kpi{grid-template-columns:repeat(2,1fr)}}
+  .kpi .k{background:#fff;border:1px solid var(--line);border-radius:14px;padding:16px;text-align:center}
+  .kpi .k b{display:block;font-size:26px;color:var(--blue);font-weight:800}
+  .kpi .k span{font-size:12.5px;color:var(--muted)}
+</style>
+</head>
+<body>
+<header class="hero">
+  <div class="wrap">
+    <div class="brand"><span class="mark">S</span> Swift Sign Group · AI Assistant</div>
+    <h1>System Architecture</h1>
+    <p>An end-to-end map of how the Swift Sign Group AI chatbot works — from the visitor's browser, through the serverless API and AI model, to the knowledge base and database. Covers both <b>production (Vercel)</b> and <b>local development</b>.</p>
+    <div class="tags">
+      <span class="tag">Static Frontend</span><span class="tag">Vercel Serverless API</span><span class="tag">FastAPI Backend</span>
+      <span class="tag">Google Gemini</span><span class="tag">SQLite + RAG</span><span class="tag">Conversation History</span>
+    </div>
+  </div>
+</header>
+<main class="wrap">
+
+<section id="overview">
+  <h2><span class="num">01</span>Overview</h2>
+  <p class="sub">What the product does and the big idea in one paragraph.</p>
+  <div class="card">
+    <p style="margin-top:0">The <b>Swift Sign Group AI Assistant</b> is a chat widget embedded in a marketing website. Visitors ask questions about any of the group's five divisions (IT &amp; Cyber, Business Setup, Shipping, Laila Hijab, Organic Foods) and get instant, accurate answers powered by <b>Google Gemini</b> and a curated company knowledge base. The assistant replies in English or Roman Urdu, remembers the current conversation for follow-up questions, and falls back gracefully when AI models are busy.</p>
+    <div class="kpi">
+      <div class="k"><b>2</b><span>Deploy targets (Vercel + local)</span></div>
+      <div class="k"><b>5</b><span>Business divisions</span></div>
+      <div class="k"><b>6</b><span>AI model fallbacks</span></div>
+      <div class="k"><b>~2–4s</b><span>Typical reply time</span></div>
+    </div>
+    <p style="margin-bottom:0"><span class="pill-live"><span class="d"></span> Live at swiftsign-chatbot.vercel.app</span></p>
+  </div>
+</section>
+
+<section id="bigpicture">
+  <h2><span class="num">02</span>Big Picture</h2>
+  <p class="sub">The full request path from the visitor's browser to the AI and back. In production everything below is hosted on Vercel.</p>
+  <div class="card">
+    <div class="n-blue node">
+      <div class="t">👤 Visitor's Browser</div>
+      <div class="d">Static marketing site + chat widget (HTML / CSS / JS). Served globally by Vercel's CDN.</div>
+    </div>
+    <div class="arrow col">▼</div>
+    <div class="n-purple node">
+      <div class="t">⚙️ /api/chat — Serverless Function &nbsp;<span class="chip api">Python</span></div>
+      <div class="d">Receives the message + short conversation history. Handles greetings, security filtering, then calls the AI. Runs only when a request arrives (no server to babysit).</div>
+    </div>
+    <div class="arrow col">▼</div>
+    <div class="n-amber node">
+      <div class="t">🤖 Google Gemini + Knowledge Base &nbsp;<span class="chip ai">AI</span></div>
+      <div class="d">A system prompt carrying the full Swift Sign knowledge base is sent with the user's question. A resilient model cascade picks the first healthy model.</div>
+    </div>
+    <div class="arrow col">▼</div>
+    <div class="n-green node">
+      <div class="t">💬 Answer → back through the same path</div>
+      <div class="d">The reply travels back to the serverless function, then to the browser, where it is rendered as a chat bubble and saved to local history.</div>
+    </div>
+    <div class="legend">
+      <span><span class="dot" style="background:#bcd0ff"></span>Client</span>
+      <span><span class="dot" style="background:#d9c6ff"></span>Edge / Serverless</span>
+      <span><span class="dot" style="background:#f3d69a"></span>AI Model</span>
+      <span><span class="dot" style="background:#a9e6bd"></span>Response</span>
+    </div>
+  </div>
+</section>
+
+<section id="lifecycle">
+  <h2><span class="num">03</span>Request Lifecycle</h2>
+  <p class="sub">What happens, in order, when a visitor sends one chat message.</p>
+  <div class="steps">
+    <div class="step"><div class="n">1</div><div class="b"><b>Visitor types &amp; sends <span class="chip fe">Browser</span></b><span>The widget grabs the text, shows a "typing…" bubble, and POSTs <code class="inline">{ message, history[] }</code> to <code class="inline">/api/chat</code>.</span></div></div>
+    <div class="step"><div class="n">2</div><div class="b"><b>Endpoint receives the request <span class="chip api">Serverless</span></b><span>Extracts the message and prior turns. Empty message → instant greeting reply.</span></div></div>
+    <div class="step"><div class="n">3</div><div class="b"><b>Greeting detection (no AI call) <span class="chip api">Serverless</span></b><span>If it's "hi", "hello", "assalam o alaikum" etc., a canned warm reply returns instantly in the matching language.</span></div></div>
+    <div class="step"><div class="n">4</div><div class="b"><b>Prompt-injection guard <span class="chip api">Serverless</span></b><span>Phrases like "ignore previous instructions" or "show system prompt" are blocked with a security notice.</span></div></div>
+    <div class="step"><div class="n">5</div><div class="b"><b>Build the AI prompt <span class="chip ai">AI</span></b><span>The full knowledge base becomes the <b>system instruction</b>; the last 10 conversation turns are folded in for follow-up context.</span></div></div>
+    <div class="step"><div class="n">6</div><div class="b"><b>Model cascade call <span class="chip ai">AI</span></b><span>Gemini is tried model-by-model (fastest first). If one is overloaded (503), it silently moves to the next.</span></div></div>
+    <div class="step"><div class="n">7</div><div class="b"><b>Reply returns to the browser <span class="chip fe">Browser</span></b><span>The answer is rendered as a bubble, added to history, and persisted to <code class="inline">localStorage</code> so it survives a refresh.</span></div></div>
+  </div>
+</section>
+
+<section id="deploy">
+  <h2><span class="num">04</span>Deployment Topology</h2>
+  <p class="sub">Two ways the app runs: the live Vercel deployment and a developer's local machine.</p>
+  <div class="grid g2">
+    <div class="card">
+      <h3>🚀 Production — Vercel</h3>
+      <p style="margin-top:0;font-size:14px;color:var(--muted)">What real visitors hit at <b>swiftsign-chatbot.vercel.app</b>.</p>
+      <table>
+        <tr><th>Part</th><th>Where it runs</th></tr>
+        <tr><td>Frontend site</td><td><code>frontend/</code> served by Vercel CDN</td></tr>
+        <tr><td>Chat API</td><td><code>api/chat.py</code> serverless function</td></tr>
+        <tr><td>AI key</td><td><code>GEMINI_API_KEY</code> env var (Vercel)</td></tr>
+        <tr><td>History</td><td>Browser <code>localStorage</code> (per device)</td></tr>
+        <tr><td>Trigger</td><td>Push to <code>main</code> → auto-deploy + CI</td></tr>
+      </table>
+    </div>
+    <div class="card">
+      <h3>💻 Local Development</h3>
+      <p style="margin-top:0;font-size:14px;color:var(--muted)">For building and testing on your own PC.</p>
+      <table>
+        <tr><th>Part</th><th>Where it runs</th></tr>
+        <tr><td>Frontend site</td><td>Open <code>frontend/index.html</code></td></tr>
+        <tr><td>Chat API</td><td>FastAPI backend via <code>start.bat</code></td></tr>
+        <tr><td>AI key</td><td><code>.env</code> file (never committed)</td></tr>
+        <tr><td>Database</td><td>SQLite <code>backend/sql_app.db</code></td></tr>
+        <tr><td>API URL</td><td><code>http://127.0.0.1:8000/api/chat</code></td></tr>
+      </table>
+    </div>
+  </div>
+  <p class="sub" style="margin:18px 0 0">The frontend auto-detects where it's running: on <code class="inline">localhost</code> it calls the local backend; on Vercel it calls the same-origin <code class="inline">/api/chat</code> function. No code changes needed between the two.</p>
+</section>
+
+<section id="components">
+  <h2><span class="num">05</span>Components</h2>
+  <p class="sub">The building blocks, grouped by layer, with the key files that implement them.</p>
+  <div class="grid g3">
+    <div class="card">
+      <h3>🎨 Frontend</h3>
+      <p class="node n-blue" style="padding:10px 12px;border-radius:10px"><code class="inline">frontend/</code></p>
+      <ul style="font-size:13.5px;color:var(--muted);line-height:1.9;padding-left:18px;margin:10px 0 0">
+        <li><code class="inline">index.html</code> — site + chat widget</li>
+        <li><code class="inline">script.js</code> — send/receive, history</li>
+        <li><code class="inline">style.css</code> — theme &amp; layout</li>
+      </ul>
+    </div>
+    <div class="card">
+      <h3>⚙️ Serverless API</h3>
+      <p class="node n-purple" style="padding:10px 12px;border-radius:10px"><code class="inline">api/chat.py</code></p>
+      <ul style="font-size:13.5px;color:var(--muted);line-height:1.9;padding-left:18px;margin:10px 0 0">
+        <li>Greeting + security checks</li>
+        <li>Conversation context builder</li>
+        <li>Resilient model cascade</li>
+      </ul>
+    </div>
+    <div class="card">
+      <h3>🧠 FastAPI Backend</h3>
+      <p class="node n-teal" style="padding:10px 12px;border-radius:10px"><code class="inline">backend/app/</code></p>
+      <ul style="font-size:13.5px;color:var(--muted);line-height:1.9;padding-left:18px;margin:10px 0 0">
+        <li><code class="inline">main.py</code> — chat endpoint</li>
+        <li><code class="inline">rag_engine.py</code> — RAG + DB</li>
+        <li><code class="inline">admin.py</code> — knowledge CRUD</li>
+      </ul>
+    </div>
+    <div class="card">
+      <h3>📚 Knowledge Base</h3>
+      <p class="node n-amber" style="padding:10px 12px;border-radius:10px"><code class="inline">knowledge_base.py</code></p>
+      <ul style="font-size:13.5px;color:var(--muted);line-height:1.9;padding-left:18px;margin:10px 0 0">
+        <li>6 division data blocks</li>
+        <li>Brand → division aliases</li>
+        <li>Feeds every AI prompt</li>
+      </ul>
+    </div>
+    <div class="card">
+      <h3>🗄️ Database</h3>
+      <p class="node n-green" style="padding:10px 12px;border-radius:10px"><code class="inline">SQLite</code></p>
+      <ul style="font-size:13.5px;color:var(--muted);line-height:1.9;padding-left:18px;margin:10px 0 0">
+        <li>Clients · Assistants</li>
+        <li>Business units</li>
+        <li>Knowledge chunks (RAG)</li>
+      </ul>
+    </div>
+    <div class="card">
+      <h3>🤖 AI Provider</h3>
+      <p class="node n-red" style="padding:10px 12px;border-radius:10px"><code class="inline">google-genai</code></p>
+      <ul style="font-size:13.5px;color:var(--muted);line-height:1.9;padding-left:18px;margin:10px 0 0">
+        <li>Gemini Flash models</li>
+        <li>System-instruction prompting</li>
+        <li>Key via env var only</li>
+      </ul>
+    </div>
+  </div>
+</section>
+
+<section id="cascade">
+  <h2><span class="num">06</span>Resilient AI Model Cascade</h2>
+  <p class="sub">The API never depends on a single model. It tries a list in order and moves on if one is overloaded — this keeps replies fast and reliable.</p>
+  <div class="card">
+    <div class="cascade">
+      <div class="casc"><span class="rank">1</span><span class="name">gemini-3.5-flash-lite</span><span class="badge fast">Primary · fastest</span></div>
+      <div class="casc"><span class="rank">2</span><span class="name">gemini-2.5-flash</span><span class="badge ok">Reliable fallback</span></div>
+      <div class="casc"><span class="rank">3</span><span class="name">gemini-flash-latest</span><span class="badge fb">Fallback</span></div>
+      <div class="casc"><span class="rank">4</span><span class="name">gemini-3.5-flash</span><span class="badge fb">Fallback</span></div>
+      <div class="casc"><span class="rank">5</span><span class="name">gemini-3.6-flash</span><span class="badge fb">Fallback</span></div>
+      <div class="casc"><span class="rank">6</span><span class="name">gemini-3.8-flash</span><span class="badge fb">Fallback</span></div>
+    </div>
+    <p style="margin:16px 0 0;font-size:13.5px;color:var(--muted)">If a model returns <code class="inline">503 UNAVAILABLE</code> (high demand), the code logs it and tries the next. Only if <b>all</b> fail does the user see a friendly "high volume" message with direct contact details.</p>
+  </div>
+</section>
+
+<section id="history">
+  <h2><span class="num">07</span>Conversation History</h2>
+  <p class="sub">How the chat remembers what was said — across reloads and for follow-up questions.</p>
+  <div class="grid g2">
+    <div class="card">
+      <h3>🖥️ Client side (per device)</h3>
+      <p style="font-size:14px;color:var(--muted);margin-top:6px">Every message is appended to an array and saved to the browser's <code class="inline">localStorage</code> under <code class="inline">swiftsign-chat-history</code>. On page load, stored messages are re-rendered, so closing the tab doesn't lose the conversation. The 🧹 Clear button empties both the view and storage.</p>
+    </div>
+    <div class="card">
+      <h3>🧠 Context to the AI</h3>
+      <p style="font-size:14px;color:var(--muted);margin-top:6px">The last 10 turns are sent with each request. The backend folds them into the prompt so follow-ups like <i>"what about their price?"</i> are understood relative to the earlier question — then answered only from the knowledge base.</p>
+    </div>
+  </div>
+</section>
+
+<section id="files">
+  <h2><span class="num">08</span>Repository Map</h2>
+  <p class="sub">Where everything lives in the project folder.</p>
+  <div class="tree">
+<span class="dir">frontend/</span>  <span class="note">— the website + chat widget (deployed to Vercel)</span><br>
+&nbsp;&nbsp;<span class="file">index.html</span>  <span class="note">— page + widget markup</span><br>
+&nbsp;&nbsp;<span class="file">script.js</span>  <span class="note">— chat logic, history, API calls</span><br>
+&nbsp;&nbsp;<span class="file">style.css</span>  <span class="note">— theme &amp; responsive layout</span><br>
+<span class="dir">api/</span>  <span class="note">— Vercel serverless function (production API)</span><br>
+&nbsp;&nbsp;<span class="file">chat.py</span>  <span class="note">— greeting/security/context + model cascade</span><br>
+&nbsp;&nbsp;<span class="file">knowledge_base.py</span>  <span class="note">— copy of company data for the function</span><br>
+<span class="dir">backend/</span>  <span class="note">— full FastAPI backend (local + optional Render)</span><br>
+&nbsp;&nbsp;<span class="dir">app/main.py</span>  <span class="note">— /api/chat endpoint + admin router</span><br>
+&nbsp;&nbsp;<span class="dir">app/core/rag_engine.py</span>  <span class="note">— retrieval + Gemini call</span><br>
+&nbsp;&nbsp;<span class="dir">app/database/</span>  <span class="note">— models + SQLite session</span><br>
+&nbsp;&nbsp;<span class="file">knowledge_base.py</span> · <span class="file">seed.py</span> · <span class="file">.env</span><br>
+<span class="dir">root</span>  <span class="note">— config, deployment, docs</span><br>
+&nbsp;&nbsp;<span class="file">vercel.json</span> · <span class="file">render.yaml</span> · <span class="file">requirements.txt</span><br>
+&nbsp;&nbsp;<span class="file">start.bat</span> · <span class="file">run.py</span> · <span class="file">test_app.py</span> · <span class="file">DEPLOY.md</span>
+  </div>
+</section>
+
+<section id="stack">
+  <h2><span class="num">09</span>Tech Stack</h2>
+  <p class="sub">The exact technologies and libraries in use.</p>
+  <div class="card">
+    <table>
+      <tr><th>Layer</th><th>Technology</th><th>Role</th></tr>
+      <tr><td>Frontend</td><td>HTML · CSS · Vanilla JS</td><td>Marketing site + chat widget</td></tr>
+      <tr><td>Hosting</td><td>Vercel (CDN + Functions)</td><td>Serves site &amp; runs <code>/api/chat</code></td></tr>
+      <tr><td>API (prod)</td><td>Python (BaseHTTPRequestHandler)</td><td>Serverless chat endpoint</td></tr>
+      <tr><td>API (local)</td><td>FastAPI + Uvicorn</td><td>Full backend + admin + docs</td></tr>
+      <tr><td>AI</td><td>Google Gemini (<code>google-genai</code>)</td><td>Generates answers</td></tr>
+      <tr><td>Data</td><td>SQLAlchemy + SQLite</td><td>Clients, assistants, knowledge</td></tr>
+      <tr><td>Config</td><td>python-dotenv</td><td>Loads <code>GEMINI_API_KEY</code></td></tr>
+      <tr><td>CI</td><td>GitHub Actions</td><td>Runs tests on every push</td></tr>
+    </table>
+  </div>
+</section>
+
+<section id="contract">
+  <h2><span class="num">10</span>API Contract</h2>
+  <p class="sub">The single endpoint the whole system revolves around: <code class="inline">POST /api/chat</code>.</p>
+  <div class="grid g2">
+    <div>
+      <h3 style="font-size:14px">Request</h3>
+      <pre>{
+  <span class="k">"message"</span>: <span class="s">"what about their price?"</span>,
+  <span class="k">"history"</span>: [
+    { <span class="k">"role"</span>: <span class="s">"user"</span>, <span class="k">"text"</span>: <span class="s">"Tell me about IT"</span> },
+    { <span class="k">"role"</span>: <span class="s">"bot"</span>,  <span class="k">"text"</span>: <span class="s">"We offer…"</span> }
+  ]
+}</pre>
+    </div>
+    <div>
+      <h3 style="font-size:14px">Response</h3>
+      <pre>{
+  <span class="k">"response"</span>: <span class="s">"Prices depend on…"</span>,
+  <span class="k">"answer"</span>:   <span class="s">"Prices depend on…"</span>,
+  <span class="k">"message"</span>:  <span class="s">"Prices depend on…"</span>,
+  <span class="k">"status"</span>:   <span class="s">"success"</span>
+}</pre>
+    </div>
+  </div>
+  <p class="sub" style="margin:16px 0 0">The reply is duplicated across <code class="inline">response</code> / <code class="inline">answer</code> / <code class="inline">message</code> on purpose — the frontend accepts any of them, which keeps older and newer clients compatible.</p>
+</section>
+
+</main>
+<footer>
+  <div class="wrap">
+    Swift Sign Group AI Assistant · System Architecture · <span class="pill-live"><span class="d"></span> Production: swiftsign-chatbot.vercel.app</span>
+  </div>
+</footer>
+</body>
+</html>
+
+
