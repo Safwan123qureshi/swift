@@ -135,14 +135,19 @@ def check_prompt_injection(user_text: str) -> bool:
     return any(phrase in lowered for phrase in FORBIDDEN_PROMPTS)
 
 # Candidate Gemini models for resilient cascading.
-# Only currently-available Gemini Flash models are listed (per Google's model docs).
-# The cascading loop tries each in order and falls through on 503/overload,
-# so ordering the most reliable stable model first minimises latency.
+# Ordered FASTEST / most-reliable first (verified live): the "-latest" and
+# preview flash models frequently return 503 UNAVAILABLE under load, so we lead
+# with gemini-3.5-flash-lite (sub-second, stable) then gemini-2.5-flash, and
+# keep the rest purely as fallbacks. The cascade falls through on 503/overload,
+# so leading with reliable models minimises latency and avoids the "high volume"
+# canned reply being shown to real users.
 MODEL_CANDIDATES: List[str] = [
-    "gemini-3.6-flash",
-    "gemini-flash-latest",
-    "gemini-3.8-flash",
     "gemini-3.5-flash-lite",
+    "gemini-2.5-flash",
+    "gemini-flash-latest",
+    "gemini-3.5-flash",
+    "gemini-3.6-flash",
+    "gemini-3.8-flash",
 ]
 
 _gemini_client: Optional[genai.Client] = None

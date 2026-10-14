@@ -50,11 +50,17 @@ def detect_greeting(text: str) -> Optional[str]:
             return "english"
     return None
 
+# Ordered FASTEST / most-reliable first (verified live): the "-latest" and
+# preview flash models frequently return 503 UNAVAILABLE under load, so we lead
+# with gemini-3.5-flash-lite (sub-second, stable) then gemini-2.5-flash, keeping
+# the rest purely as fallbacks.
 MODEL_CANDIDATES: List[str] = [
+    "gemini-3.5-flash-lite",
+    "gemini-2.5-flash",
     "gemini-flash-latest",
-    "gemini-3.8-flash",
+    "gemini-3.5-flash",
     "gemini-3.6-flash",
-    "gemini-3.5-flash-lite"
+    "gemini-3.8-flash",
 ]
 
 def get_ai_reply(user_query: str, api_key: str) -> str:
