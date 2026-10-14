@@ -63,7 +63,32 @@ MODEL_CANDIDATES: List[str] = [
     "gemini-3.8-flash",
 ]
 
-def get_ai_reply(user_query: str, api_key: str) -> str:
+def build_conversation_prompt(user_query: str, history) -> str:
+    """Fold short-term conversation history into the prompt for follow-up context."""
+    history_lines = []
+    if isinstance(history, list):
+        for turn in history[-10:]:  # keep only the last 10 turns to bound cost
+            if not isinstance(turn, dict):
+                continue
+            role = str(turn.get("role") or "").lower()
+            text = str(turn.get("text") or turn.get("content") or "").strip()
+            if not text:
+                continue
+            if role in ("user", "human"):
+                history_lines.append(f"User: {text}")
+            elif role in ("bot", "assistant", "ai"):
+                history_lines.append(f"Assistant: {text}")
+    if not history_lines:
+        return user_query
+    return (
+        "PREVIOUS CONVERSATION (for context only — do not repeat it):\n"
+        + "\n".join(history_lines)
+        + "\n\nUse the above only to resolve follow-up references (e.g. 'it', 'them', 'their price').\n"
+        f"CURRENT USER MESSAGE: {user_query}"
+    )
+
+
+def get_ai_reply(user_query: str, api_key: str, history=None) -> str:
     from google import genai
 
     full_knowledge = "\n".join(COMPANY_DATA.values())
@@ -79,6 +104,8 @@ RULES:
 3. Keep answers concise, polite, and professional.
 """
 
+    prompt_for_model = build_conversation_prompt(user_query, history)
+
     client = genai.Client(api_key=api_key)
     last_err = None
 
@@ -86,7 +113,7 @@ RULES:
         try:
             response = client.models.generate_content(
                 model=model_name,
-                contents=user_query,
+                contents=prompt_for_model,
                 config={"system_instruction": system_instruction}
             )
             if response and response.text:
@@ -129,6 +156,7 @@ class handler(BaseHTTPRequestHandler):
             data = json.loads(body)
 
             user_query = (data.get("message") or data.get("question") or "").strip()
+            history = data.get("history") or []
 
             if not user_query:
                 reply = "Hello! I am the official AI assistant for Swift Sign Group. How can I help you today?"
@@ -150,7 +178,7 @@ class handler(BaseHTTPRequestHandler):
                 self._respond(500, {"response": "⚠️ Server configuration error: GEMINI_API_KEY not set.", "status": "error"})
                 return
 
-            reply = get_ai_reply(user_query, api_key)
+            reply = get_ai_reply(user_query, api_key, history)
             self._respond(200, {"response": reply, "message": reply, "status": "success"})
 
         except Exception as e:

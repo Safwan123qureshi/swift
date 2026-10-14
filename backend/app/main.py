@@ -80,6 +80,9 @@ class ChatRequest(BaseModel):
     brand: Optional[str] = None
     client_id: Optional[str] = None
     session_id: Optional[str] = None
+    # Optional prior conversation turns, e.g. [{"role": "user"|"bot", "text": "..."}].
+    # Used to give the AI short-term context for follow-up questions.
+    history: Optional[List[dict]] = None
 
 class ChatResponse(BaseModel):
     response: str
@@ -330,9 +333,34 @@ OPERATIONAL GUIDELINES:
    - OUT-OF-SCOPE: If a question is completely unrelated to Swift Sign Group or polite conversation (such as international weather or external political debates), politely state your role as Swift Sign Group's assistant and guide the user back to company services.
 """
 
-        # 7. Call Google Gemini API with automatic model resiliency
+        # 7. Build conversation-aware prompt (include short-term history for follow-ups)
+        history = request.history or []
+        history_lines = []
+        for turn in history[-10:]:  # keep only the last 10 turns to bound cost
+            if not isinstance(turn, dict):
+                continue
+            role = (turn.get("role") or "").lower()
+            text = (turn.get("text") or turn.get("content") or "").strip()
+            if not text:
+                continue
+            speaker = "User" if role in ("user", "human") else ("Assistant" if role in ("bot", "assistant", "ai") else None)
+            if speaker:
+                history_lines.append(f"{speaker}: {text}")
+
+        if history_lines:
+            conversation_context = (
+                "PREVIOUS CONVERSATION (for context only — do not repeat it):\n"
+                + "\n".join(history_lines)
+                + "\n\nUse the above only to resolve follow-up references (e.g. 'it', 'them', 'their price').\n"
+                f"CURRENT USER MESSAGE: {user_query}"
+            )
+            prompt_for_model = conversation_context
+        else:
+            prompt_for_model = user_query
+
+        # 8. Call Google Gemini API with automatic model resiliency
         client = get_gemini_client(api_key)
-        reply_text = generate_gemini_reply(client, user_query, system_instruction)
+        reply_text = generate_gemini_reply(client, prompt_for_model, system_instruction)
 
         # 8. Return robust, multi-field JSON response
         return {

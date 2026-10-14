@@ -23,6 +23,40 @@ const API_URL = resolveApiUrl();
 // ---- State --------------------------------------------------
 let isLoading = false;
 
+// ---- Conversation history (persisted in localStorage) --------
+// Keeps the chat window showing previous messages across page reloads and
+// gives the AI context for follow-up questions.
+let conversationHistory = [];                 // [{ role: 'user' | 'bot', text: '...' }]
+const HISTORY_KEY = 'swiftsign-chat-history';
+const MAX_STORED_MESSAGES = 50;
+
+function saveHistory() {
+    try {
+        const trimmed = conversationHistory.slice(-MAX_STORED_MESSAGES);
+        localStorage.setItem(HISTORY_KEY, JSON.stringify(trimmed));
+    } catch (e) { /* storage unavailable — ignore */ }
+}
+
+function loadHistory() {
+    try {
+        const raw = localStorage.getItem(HISTORY_KEY);
+        conversationHistory = raw ? (JSON.parse(raw) || []) : [];
+    } catch (e) {
+        conversationHistory = [];
+    }
+}
+
+// Re-render any stored conversation into the chat window on load.
+function renderStoredHistory() {
+    const chatBox = document.getElementById('chatBox');
+    if (!chatBox) return;
+    if (conversationHistory.length) {
+        chatBox.innerHTML = '';
+        conversationHistory.forEach(m => addMessage(m.role, m.text));
+        scrollToBottom();
+    }
+}
+
 // ---- Chat window open / close -------------------------------
 function toggleChat(forceOpen) {
     const chatContainer = document.getElementById('chat-container');
@@ -132,6 +166,9 @@ async function sendMessage(event) {
     if (sendBtn) sendBtn.disabled = true;
 
     addMessage('user', text);
+    // Record the user's turn (exclude the one we just appended) for context + persistence.
+    conversationHistory.push({ role: 'user', text });
+    saveHistory();
     if (input) input.value = '';
     showTyping();
 
@@ -139,7 +176,7 @@ async function sendMessage(event) {
         const response = await fetch(API_URL, {
             method: 'POST',
             headers: { 'Content-Type': 'application/json' },
-            body: JSON.stringify({ message: text })
+            body: JSON.stringify({ message: text, history: conversationHistory.slice(0, -1) })
         });
 
         if (!response.ok) {
@@ -155,6 +192,8 @@ async function sendMessage(event) {
         hideTyping();
         const botReply = data.reply || data.response || data.answer || data.message || "Sorry, I didn't catch that. Could you rephrase?";
         addMessage('bot', botReply);
+        conversationHistory.push({ role: 'bot', text: botReply });
+        saveHistory();
 
     } catch (error) {
         console.error('Chat error:', error);
@@ -187,6 +226,8 @@ function askAbout(topic) {
 
 // ---- Clear conversation -------------------------------------
 function clearChat() {
+    conversationHistory = [];
+    saveHistory();
     const chatBox = document.getElementById('chatBox');
     if (chatBox) chatBox.innerHTML = '';
     addMessage('bot', '👋 Hi again! How can I help you with Swift Sign Group today?');
@@ -196,6 +237,10 @@ function clearChat() {
 
 // ---- Init ---------------------------------------------------
 document.addEventListener('DOMContentLoaded', () => {
+    // Restore previous conversation (if any) so history shows across reloads.
+    loadHistory();
+    renderStoredHistory();
+
     // Footer year
     const year = document.getElementById('year');
     if (year) year.textContent = new Date().getFullYear();
